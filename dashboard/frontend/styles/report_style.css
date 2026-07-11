@@ -1,0 +1,187 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Inter", -apple-system, sans-serif;
+    background: #f0f4f9;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+}
+
+.card {
+    max-width: 720px;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 28px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    padding: 32px 36px;
+    border: 1px solid #eaf0f6;
+}
+
+.back-btn
+{
+    text-decoration: none;
+    color: #1a2639;
+
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-block: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f0f4f9;
+}
+
+.card-header .title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.card-header .title i {
+    font-size: 26px;
+    color: #e74c3c;
+    background: #fde8e8;
+    padding: 10px;
+    border-radius: 14px;
+}
+
+.card-header .title h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a2639;
+    letter-spacing: -0.3px;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px 6px 12px;
+    border-radius: 40px;
+    font-size: 13px;
+    font-weight: 600;
+    background: #fde8e8;
+    color: #b33c3c;
+}
+
+.badge .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e74c3c;
+    display: inline-block;
+}
+
+.field-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    margin-bottom: 16px;
+}
+
+.field-item {
+    flex: 1 0 calc(50% - 12px);
+    min-width: 160px;
+}
+
+.field-item .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    color: #7a8da0;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.field-item .label i {
+    font-size: 12px;
+    color: #9aabbc;
+}
+
+.field-item .value {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a2639;
+    padding: 6px 12px;
+    background: #f8faff;
+    border-radius: 10px;
+    border: 1px solid #eef2f8;
+    display: inline-block;
+    width: 100%;
+}
+
+.value.client-ip {
+    font-family: "SF Mono", "Fira Code", monospace;
+    background: #f4f7fb;
+}
+
+.value.method {
+    font-family: "SF Mono", "Fira Code", monospace;
+    background: #e3f0fc;
+    color: #1a6b9e;
+    border-color: #d0e4f5;
+}
+
+.value.protocol {
+    font-family: "SF Mono", "Fira Code", monospace;
+}
+
+.message-block {
+    margin-top: 8px;
+    padding-top: 18px;
+    border-top: 1px solid #f0f4f9;
+}
+
+.message-block .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    color: #7a8da0;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.message-block .value {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1a2639;
+    background: #f8faff;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid #eef2f8;
+    line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+    .card {
+        padding: 24px 18px;
+    }
+
+    .field-item {
+        flex: 1 0 100%;
+    }
+
+    .card-header {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .card-header .title h2 {
+        font-size: 18px;
+    }
+}

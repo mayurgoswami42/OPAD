@@ -1,0 +1,162 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Inter", -apple-system, sans-serif;
+    background: #f0f4f9;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+}
+
+.card {
+    max-width: 480px;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 28px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    padding: 48px 40px 40px;
+    border: 1px solid #eaf0f6;
+    text-align: center;
+}
+
+/* ── 404 number ── */
+.error-code {
+    font-size: 80px;
+    font-weight: 700;
+    letter-spacing: -4px;
+    color: #1a2639;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.error-code span {
+    color: #e74c3c;
+}
+
+/* ── icon ── */
+.error-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background: #fde8e8;
+    border-radius: 16px;
+    margin-bottom: 16px;
+}
+
+.error-icon i {
+    font-size: 28px;
+    color: #e74c3c;
+}
+
+/* ── title ── */
+.error-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a2639;
+    margin-bottom: 8px;
+}
+
+.error-message {
+    font-size: 15px;
+    color: #7a8da0;
+    line-height: 1.6;
+    margin-bottom: 32px;
+}
+
+/* ── divider ── */
+.divider {
+    border: 0;
+    height: 1px;
+    background: #eef2f8;
+    margin-bottom: 28px;
+}
+
+/* ── button ── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 32px;
+    border-radius: 40px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: "Inter", -apple-system, sans-serif;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+    background: #1a2639;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(26, 38, 57, 0.15);
+}
+
+.btn:hover {
+    background: #2c3a4e;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(26, 38, 57, 0.20);
+}
+
+.btn i {
+    font-size: 14px;
+}
+
+/* ── subtle path hint ── */
+.path-hint {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #9aabbc;
+    font-family: "SF Mono", "Fira Code", monospace;
+    background: #f8faff;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid #eef2f8;
+    display: inline-block;
+    word-break: break-all;
+    max-width: 100%;
+}
+
+.path-hint i {
+    margin-right: 6px;
+    color: #bcc9d6;
+    font-size: 12px;
+}
+
+/* ── responsive ── */
+@media (max-width: 600px) {
+    .card {
+        padding: 32px 20px 28px;
+    }
+
+    .error-code {
+        font-size: 56px;
+        letter-spacing: -2px;
+    }
+
+    .error-title {
+        font-size: 18px;
+    }
+
+    .error-message {
+        font-size: 14px;
+    }
+
+    .btn {
+        padding: 10px 24px;
+        font-size: 14px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .path-hint {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+}

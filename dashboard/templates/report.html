@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anomaly Report – Single Entry</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="report_style.css">
+</head>
+<body>
+
+<div class="card">
+  <a href="/" class="back-btn">
+    <i class="fas fa-arrow-left"></i>
+    back
+  </a>
+  <div class="card-header">
+    <div class="title">
+      <i class="fas fa-shield-halved"></i>
+      <h2>Anomaly Report</h2>
+    </div>
+    <span class="badge"><span class="dot"></span> Critical</span>
+  </div>
+
+  <div class="field-group">
+    <div class="field-item">
+      <div class="label"><i class="fas fa-calendar-day"></i> Date</div>
+      <div class="value">$DATE$</div>
+    </div>
+    <div class="field-item">
+      <div class="label"><i class="fas fa-clock"></i> Time</div>
+      <div class="value">$TIME$</div>
+    </div>
+  </div>
+
+  <div class="field-group">
+    <div class="field-item">
+      <div class="label"><i class="fas fa-calendar-check"></i> Reported Date</div>
+      <div class="value">$REPORTED_DATE$</div>
+    </div>
+    <div class="field-item">
+      <div class="label"><i class="fas fa-clock"></i> Reported Time</div>
+      <div class="value">$REPORTED_TIME$</div>
+    </div>
+  </div>
+
+  <div class="field-group">
+    <div class="field-item">
+      <div class="label"><i class="fas fa-network-wired"></i> Client IP</div>
+      <div class="value client-ip">$CLIENT_IP$</div>
+    </div>
+    <div class="field-item">
+      <div class="label"><i class="fas fa-code"></i> Request Method</div>
+      <div class="value method">$REQUEST_METHOD$</div>
+    </div>
+  </div>
+
+  <div class="field-group">
+    <div class="field-item">
+      <div class="label"><i class="fas fa-globe"></i> Protocol</div>
+      <div class="value protocol">$PROTOCOL$</div>
+    </div>
+    <div class="field-item">
+      <div class="label"><i class="fas fa-tag"></i> Version</div>
+      <div class="value">$VERSION$</div>
+    </div>
+  </div>
+
+  <div class="field-group">
+    <div class="field-item" style="flex: 1 0 100%;">
+      <div class="label"><i class="fas fa-tag"></i> Anomaly Type</div>
+      <div class="value" style="background:#fde8e8; border-color:#f5d0d0; color:#b33c3c; font-weight:600;">$ANOMALY_TYPE$</div>
+    </div>
+  </div>
+
+  <div class="message-block">
+    <div class="label"><i class="fas fa-message"></i> Message</div>
+    <div class="value">$ANOMALY_MESSAGE$</div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 · Page not found</title>
+
+    <!-- Font Awesome (free icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    <!-- Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="page_not_found_style.css">
+
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <div class="card">
+
+        <div class="error-icon">
+            <i class="fas fa-link"></i>
+        </div>
+
+        <div class="error-code">4<span>0</span>4</div>
+
+        <div class="error-title">Page not found</div>
+        <p class="error-message">
+            The page you're looking for doesn't exist or has been moved.
+        </p>
+
+        <hr class="divider" />
+
+        <a href="/" class="btn">
+            <i class="fas fa-arrow-left"></i> Back to home
+        </a>
+
+        <div class="path-hint" id="path-hint">
+            <i class="fas fa-folder-open"></i>
+            <span id="requested-path">$INVALID_PATH$</span>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -16,7 +16,7 @@ log file → Reader → Parser → Detector → Reporter → SocketServer ──
 
 **C++ engine (`cpp/`)**
 - `io_manager` — tails the log file, tracking a byte offset in `storage/.reader_offset` so it resumes correctly across restarts, even while the file is being actively written
-- `parser` — parses raw log lines into structured `Log` objects
+- `parser` — schema-driven log parser built on RE2. The field schema is given as a label string (e.g. `(ip)(method)(status)`), parsed once at construction time into an ordered list of field names; `parse()` then builds RE2 capture args from that schema and runs a single `FullMatchN` per log line, returning a field-name → value map. Changing what a log format looks like is a one-line schema change, not a rewrite of the parsing logic.
 - `detector` — maintains a fixed-size sliding window over recent logs; computes per-IP, per-error-type, and per-404 request speed to detect bursts, using a function-pointer state machine (`do_insert` → `process`) to fill the window efficiently before switching to steady-state sliding
 - `reporter` — serializes flagged logs to escaped JSON
 - `socket_server` — pushes reports to connected clients over TCP using 4-byte length-prefixed framing
@@ -68,5 +68,6 @@ Then open `http://127.0.0.1:8080`.
 This is a prototype — built to explore streaming log analysis and a minimal report pipeline end-to-end, not hardened for production traffic. A few deliberate design choices worth knowing about:
 
 - The sliding window doesn't decrement `sus_count` immediately on window slide, by design — this lets short bursts after a delay still trigger detection rather than being diluted by the window average
+- The parser's field schema is declared once (as a label string) and reused across every call to `parse()`, so adding or reordering fields doesn't require touching the parsing logic itself
 - Report data is escaped for both JSON (C++ side) and HTML (Python side) since it originates from untrusted request logs
 - Static file and report serving validate that resolved paths stay within their intended directory, to prevent path traversal via crafted URLs

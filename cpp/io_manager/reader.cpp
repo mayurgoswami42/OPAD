@@ -10,9 +10,9 @@ DEBUG_DECLARE(
     }
 );
 
-// std::getline is not suitable for our case as the log files may be continuosly getting written by server,
-// std::getline returns and stop writting line when it hits std::fstream::eof() or '\n' character
-// when server is writting the logs before server finish writting line std::getline reads till last character and due to eof hit, returns
+// std::getline is not suitable for our case as the log files may be continuously getting written by server,
+// std::getline returns and stop writing line when it hits std::fstream::eof() or '\n' character
+// when server is writing the logs before server finish writing line std::getline reads till last character and due to eof hit, returns
 // and we get part of line
 // which is incorrect in our case, we need full log line to parse
 // custom_getline returns when it hits '\n' character and hence give full line
@@ -70,6 +70,7 @@ std::vector<std::string> Reader::read_logs(std::string file_name)
     std::ifstream ifile(file_name);
     if (!ifile)
     {
+        DEBUG_LOG("READER::ERROR:: Cant open log file!");
         // check the status of reader when you call read_logs
         status = false;
         return {};
@@ -83,7 +84,7 @@ std::vector<std::string> Reader::read_logs(std::string file_name)
     while (custom_getline(ifile, line))
     {
         logs.emplace_back(line);
-        offset = ifile.tellg(); // capturing offset in loop because we want offset to be last readed line not -1 in case of eof
+        offset = ifile.tellg(); // capturing offset in loop because we want offset to be last read line not -1 in case of eof
     }
 
     if (offset == -1) // ensure offset to be of last line not -1 (means eof), because log files updates continuously

@@ -48,6 +48,8 @@ void SocketServer::serve()
             {
                 DEBUG_LOG("Client " << clients_fds[i] << " is disconnected");
                 remove_client(i);
+                if (clients_fds.size() > 0)
+                    send_msg(clients_fds[i], msg); // send the message to the client just moved
                 if (clients_fds.size() <= 0)
                 {
                     stop();

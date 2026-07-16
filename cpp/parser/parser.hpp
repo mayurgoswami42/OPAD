@@ -1,28 +1,21 @@
 #pragma once
 
 #include <string>
-#include <cstdint>
 #include <vector>
+#include <any>
 #include <utility>
-#include <unordered_set>
 
-#include "log_struct.hpp"
+#include <re2/re2.h>
 
 class Parser
 {
 public:
-    Parser();
-    Log parse(std::string_view);
+    // google/re2 pattens are supported only
+    // for syntax visit https://github.com/google/re2/wiki/syntax
+    Parser(const std::string_view &labels_types, const std::string &regex_pattern); // single pattern logs
+    std::unordered_map<std::string, std::string> parse(const std::string &log_line);
 
 private:
-    static const char FIELD_SPECIFIER; // character specifies placeholders
-    static const char OMITTED_FIELD; // absent data is marked by - in log line
-    static const char VALUE_SEPARATOR; // ' ' is used to seprate different values in log line
-
-    std::unordered_set<char> avoid_chars;
-
-    int to_int(std::string_view) const; // efficient and simpler input atoi
-    bool is_avoid_char(char) const;
-    std::pair<std::string_view, std::string_view> split(std::string_view &, char) const;
-    void insert_log(Log &, int&, std::string_view);
+    const re2::RE2 regex_obj;
+    std::vector<std::pair<std::string, std::string>> parsed_logs;
 };

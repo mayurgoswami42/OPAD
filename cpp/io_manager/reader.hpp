@@ -14,9 +14,9 @@ public:
     DEBUG_DECLARE(void reset_offset()); // just for debuging purpose
     bool status = false;
     private:
-    static constexpr const char* STATE_FILE = "storage/.reader_offset"; // store offset of log file
+    static constexpr const char* STATE_FILE = "cpp/storage/.reader_offset"; // store offset of log file
     std::streampos offset{};
     std::streampos read_offset() const;
     std::streampos write_offset(std::streampos) const;
-    bool custom_getline(std::ifstream &ifile, std::string &line); // std::getline is not suitable for our case, see function defination
+    bool custom_getline(std::ifstream &ifile, std::string &line); // std::getline is not suitable for our case, see function definition
 };

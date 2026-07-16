@@ -10,12 +10,12 @@ Detector::Detector(const std::span<const Log> &server_logs, const size_t buffer_
         (this->*insert)(log);
 }
 
-const std::vector<std::pair<Log, Anomaly>> &Detector::get_sus_logs() const
+const std::vector<std::pair<Detector::Log, Anomaly>> &Detector::get_sus_logs() const
 {
     return sus_logs;
 }
 
-const std::queue<Log> &Detector::get_log_buffer() const
+const std::queue<Detector::Log> &Detector::get_log_buffer() const
 {
     return window;
 }
@@ -41,9 +41,9 @@ const double Detector::req_speed(const utils::time &i_time, const utils::time &f
 void Detector::window_increment(const Log &log)
 {
     // log time of current log
-    utils::time log_time = utils::parse_date_time(log.date, log.time); // std::string to std::chrono::system_clock::time_point
+    utils::time log_time = utils::parse_date_time(log.at("date"), log.at("time")); // std::string to std::chrono::system_clock::time_point
 
-    TimeNCount &ip = ip_frequency[log.user_ip];
+    TimeNCount &ip = ip_frequency[log.at("user_ip")];
 
     double speed = req_speed(not_found.prev_time, log_time);
 
@@ -55,7 +55,7 @@ void Detector::window_increment(const Log &log)
     ip.prev_time = log_time;
 
     // frequency count for error spike
-    if (log.log_type == LogType::ERROR)
+    if (log.at("log_type") == "ERROR")
     {
         if (req_speed(errors.prev_time, log_time) >= max_speed) // if errors are very frequent
             errors.sus_count++;
@@ -64,7 +64,7 @@ void Detector::window_increment(const Log &log)
     }
 
     // frequency count for directory attack
-    if (log.status == 404)
+    if (log.at("status") == "404")
     {
         if (req_speed(not_found.prev_time, log_time) >= max_speed) // if frequent requests to wrong directory
             not_found.sus_count++;
@@ -83,18 +83,18 @@ void Detector::window_increment(const Log &log)
 // so even if we get short brust after a delay the sus_count + new_brust will trigger the detector and the anomaly gets detected early
 void Detector::window_decrement(const Log &log)
 {
-    if (ip_frequency.find(log.user_ip) != ip_frequency.end()) // reset may erased the entry already
+    if (ip_frequency.find(log.at("user_ip")) != ip_frequency.end()) // reset may erased the entry already
     {
-        TimeNCount &ip = ip_frequency[log.user_ip];
+        TimeNCount &ip = ip_frequency[log.at("user_ip")];
         if (--ip.req_count < 1) // if log with same ip appears we will add it back, removing to save space, may same ip never comes back
-            ip_frequency.erase(log.user_ip);
+            ip_frequency.erase(log.at("user_ip"));
         if (ip.sus_count > ip.req_count) ip.sus_count = ip.req_count;
     }
 
     // decreasing frequency
-    errors.req_count -= log.log_type == LogType::ERROR;
+    errors.req_count -= log.at("log_type") == "ERROR";
     if (errors.sus_count > errors.req_count) errors.sus_count = errors.req_count;
-    not_found.req_count -= log.status == 404;
+    not_found.req_count -= log.at("status") == "404";
     if (not_found.sus_count > not_found.req_count) not_found.sus_count = not_found.req_count;
 
     window.pop();

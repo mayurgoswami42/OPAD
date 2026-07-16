@@ -1,6 +1,5 @@
 #pragma once
 
-#include <functional>
 #include <unordered_map>
 #include <string>
 #include <queue>
@@ -9,7 +8,6 @@
 #include <chrono>
 #include <utility>
 
-#include "../parser/log_struct.hpp"
 #include "anomaly_struct.hpp"
 #include "utils/utils.hpp"
 
@@ -22,6 +20,8 @@ struct TimeNCount
 
 class Detector
 {
+public:
+    typedef std::unordered_map<std::string, std::string> Log;
 private:
     const size_t buf_size{};
     const size_t sus_req_limit{};
@@ -36,12 +36,13 @@ private:
     void window_decrement(const Log &log);
     const double req_speed(const utils::time &i_time, const utils::time &f_time) const;
     // both functions do_insert and process are just for efficient switching, keeping them private to force user to use insert
-    using function = void (Detector::*)(const Log&);
+
+    using InsertFn = void (Detector::*)(const Log&);
     void do_insert(const Log& log); // insert until buf_size of full, both the functions processes the log by default
     void process(const Log& log); // then insert and pop_front, sliding window kind of processing
     
-    public:
-    function insert = nullptr;
+public:
+    InsertFn insert = nullptr;
     // max_req_speed is in requests/second
     Detector(const size_t buffer_size, const size_t sus_req_limit, const double max_req_speed) : buf_size(buffer_size), sus_req_limit(sus_req_limit), max_speed(max_req_speed), insert(&Detector::do_insert) {};
     Detector(const std::span<const Log> &logs, const size_t buffer_size, const size_t sus_req_limit, const double max_req_speed);

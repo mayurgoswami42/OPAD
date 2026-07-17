@@ -1,73 +1,196 @@
-# Anomaly Detector
+# OPAD
 
-A real-time log anomaly detector with a C++ detection engine and a Python dashboard. It tails server logs, flags suspicious patterns using a sliding-window analysis, and streams reports to a live web dashboard over a length-prefixed TCP socket.
+> **Optimized Portable Anomaly Detector**
+
+A high-performance, portable, real-time log anomaly detection platform featuring a C++ detection engine and a Python dashboard. OPAD tails server logs, detects suspicious activity using sliding-window analysis, and streams reports to a live web dashboard over a length-prefixed TCP socket.
+
+## Features
+
+- Real-time log monitoring
+- High-performance C++23 detection engine
+- Portable architecture
+- Sliding-window anomaly detection
+- Live HTML dashboard
+- Schema-driven RE2 log parser
+- TCP streaming between detector and dashboard
+- Automatic recovery from restarts
 
 ## What it detects
 
-- **High request volume from a single IP** — flags IPs sending requests faster than a configurable speed threshold
-- **Directory scanning / brute-force attacks** — flags spikes in 404 responses
-- **Error rate spikes** — flags unusual bursts of `ERROR`-level log entries
+- **High request volume from a single IP** — flags IPs sending requests faster than a configurable threshold
+- **Directory scanning / brute-force attacks** — detects bursts of 404 responses
+- **Error rate spikes** — detects unusual bursts of `ERROR` log entries
 
-## How it works
+## Architecture
 
+```text
+Log File
+    │
+    ▼
+ Reader
+    │
+    ▼
+ Parser
+    │
+    ▼
+ Detector
+    │
+    ▼
+ Reporter
+    │
+    ▼
+Socket Server
+    │
+ Length-Prefixed TCP
+    │
+    ▼
+Socket Client
+    │
+    ▼
+Report Builder
+    │
+    ▼
+ Dashboard
 ```
-log file → Reader → Parser → Detector → Reporter → SocketServer ──TCP──▶ SocketClient → ReportBuilder → dashboard
+
+## Components
+
+### C++ Engine (`cpp/`)
+
+#### `io_manager`
+
+Continuously tails the log file while tracking its byte offset in `storage/.reader_offset`, allowing OPAD to resume processing after restarts without rereading previously processed logs.
+
+#### `parser`
+
+A schema-driven log parser built on **Google RE2**.
+
+Instead of hardcoding field extraction, OPAD accepts a field schema such as
+
+```text
+(ip)(method)(status)
 ```
 
-**C++ engine (`cpp/`)**
-- `io_manager` — tails the log file, tracking a byte offset in `storage/.reader_offset` so it resumes correctly across restarts, even while the file is being actively written
-- `parser` — schema-driven log parser built on RE2. The field schema is given as a label string (e.g. `(ip)(method)(status)`), parsed once at construction time into an ordered list of field names; `parse()` then builds RE2 capture args from that schema and runs a single `FullMatchN` per log line, returning a field-name → value map. Changing what a log format looks like is a one-line schema change, not a rewrite of the parsing logic.
-- `detector` — maintains a fixed-size sliding window over recent logs; computes per-IP, per-error-type, and per-404 request speed to detect bursts, using a function-pointer state machine (`do_insert` → `process`) to fill the window efficiently before switching to steady-state sliding
-- `reporter` — serializes flagged logs to escaped JSON
-- `socket_server` — pushes reports to connected clients over TCP using 4-byte length-prefixed framing
+The schema is parsed once during construction into an ordered list of field names. During parsing, the parser dynamically constructs the RE2 capture arguments and performs a single `RE2::FullMatchN()` call to produce a field-name → value map.
 
-**Python dashboard (`dashboard/`)**
-- `socket_client.py` — connects to the C++ socket server, reconnects automatically on drop, and reads length-prefixed messages
-- `report_builder.py` — renders each report into an HTML page and updates the dashboard homepage; all report data is HTML-escaped on output
-- `server.py` — serves the dashboard over HTTP, with path-traversal protection on static file/report requests
+Changing a log format only requires updating the schema instead of rewriting parsing logic.
 
-## Running it
+#### `detector`
 
-**Build and start the detector:**
+Maintains a fixed-size sliding window over recent log entries.
+
+It tracks:
+
+- request rate per IP
+- 404 response frequency
+- error-rate spikes
+
+A function-pointer state machine
+
+```text
+do_insert → process
+```
+
+is used to efficiently transition from the initial window-fill phase into steady-state processing.
+
+#### `reporter`
+
+Serializes detected anomalies into escaped JSON before transmission.
+
+#### `socket_server`
+
+Streams reports to connected clients using 4-byte length-prefixed TCP framing.
+
+---
+
+### Python Dashboard (`dashboard/`)
+
+#### `socket_client.py`
+
+Maintains a persistent connection to the C++ engine, automatically reconnecting if the connection drops.
+
+#### `report_builder.py`
+
+Converts anomaly reports into HTML pages while escaping all user-controlled data before rendering.
+
+#### `server.py`
+
+Serves the dashboard through a lightweight HTTP server with path traversal protection for both static assets and generated reports.
+
+## Running OPAD
+
+### Build and start the detector
+
 ```bash
-mkdir build && cd build
+mkdir build
+cd build
+
 cmake ../cpp
 cmake --build . -t run
 ```
 
-**Start the dashboard:**
+### Start the dashboard
+
 ```bash
 cd dashboard
 python3 main.py
 ```
 
-## Testing with the testbed
+## Testing
 
-The `testbed/` folder contains a throwaway HTTP server and a traffic generator for exercising the detector against directory-scan and flood patterns, without needing real traffic.
+The `testbed/` directory contains a disposable HTTP server together with a traffic generator for exercising OPAD without requiring production traffic.
 
-⚠️ `testbed/server.py` is a separate, local-only test server — it trusts a client-supplied `X-Test-IP` header to simulate requests from different IPs. This is intentional for testing, but this pattern should never be used outside the testbed.
+### Start the test server
 
-**Start the test server**
 ```bash
 cd testbed
 python3 server.py
 ```
 
-**Generate test traffic**
+### Generate attack traffic
+
 ```bash
 cd testbed
 python3 attacker.py
 ```
 
-Point the C++ detector at `logs/server.log` (or wherever `server.py`'s logging is configured to write) to see anomalies get flagged and reported to the dashboard in real time.
+Point the detector at the generated log file (typically `logs/server.log`) to observe anomalies being detected and streamed to the dashboard.
 
-Then open `http://127.0.0.1:8080`.
+Open:
 
-## Notes
+```text
+http://127.0.0.1:8080
+```
 
-This is a prototype — built to explore streaming log analysis and a minimal report pipeline end-to-end, not hardened for production traffic. A few deliberate design choices worth knowing about:
+## Security Notes
 
-- The sliding window doesn't decrement `sus_count` immediately on window slide, by design — this lets short bursts after a delay still trigger detection rather than being diluted by the window average
-- The parser's field schema is declared once (as a label string) and reused across every call to `parse()`, so adding or reordering fields doesn't require touching the parsing logic itself
-- Report data is escaped for both JSON (C++ side) and HTML (Python side) since it originates from untrusted request logs
-- Static file and report serving validate that resolved paths stay within their intended directory, to prevent path traversal via crafted URLs
+The test server intentionally trusts the client-supplied `X-Test-IP` header to simulate requests from different IP addresses.
+
+This behavior exists **only** to simplify testing and must never be used in a production deployment.
+
+## Design Notes
+
+OPAD is a prototype focused on exploring high-performance streaming log analysis rather than being a production SIEM.
+
+Notable implementation details include:
+
+- Schema-driven parsing that separates log structure from parsing logic.
+- Fixed-memory sliding-window analysis.
+- Function-pointer state machine for efficient initialization.
+- Length-prefixed TCP protocol between the detection engine and dashboard.
+- JSON escaping in C++ and HTML escaping in Python to safely handle untrusted log data.
+- Path validation to prevent directory traversal attacks.
+- Resume support using persisted byte offsets for uninterrupted log processing after restarts.
+
+## Tech Stack
+
+- **C++23**
+- **Python 3**
+- **Google RE2**
+- **CMake**
+- **TCP Sockets**
+- **Sliding Window Algorithms**
+
+---
+
+**OPAD (Optimized Portable Anomaly Detector)** is a portable, real-time log anomaly detection platform built to demonstrate efficient streaming analysis, modular architecture, and secure end-to-end report generation.

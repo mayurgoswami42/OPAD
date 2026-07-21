@@ -2,61 +2,111 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Report Directory</title>
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-
-    <!-- Google Font: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPAD — Anomaly Detector</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
-        rel="stylesheet" />
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <div class="container">
-        <div class="card">
 
-            <!-- header -->
-            <div class="header">
-                <div class="header-left">
-                    <div class="icon">
-                        <i class="fas fa-folder-open"></i>
-                    </div>
-                    <h1>Report Directory</h1>
-                </div>
-                <div class="header-right">
-                    <span class="badge">
-                        <i class="fas fa-file-alt"></i>
-                        <div class="file_count">-</div> reports
-                    </span>
-                </div>
+    <div class="app">
+
+        <header class="topbar">
+            <div class="brand">
+                OPAD <span class="brand-sub">Optimized Portable Anomaly Detector</span>
             </div>
-
-            <!-- report grid -->
-            <div class="report-grid">
-                <div class="inserter">$INSERTER$</div>
+            <div class="topbar-spacer"></div>
+            <div class="status-cluster">
+                <div class="status-item"><span class="dot pulse" id="connDot"></span> socket <span class="status-value"
+                        id="connLabel">connected</span></div>
+                <div class="status-item">window <span class="status-value" id="windowState">steady-state</span></div>
+                <div class="status-item">uptime <span class="status-value" id="uptime">00:00:00</span></div>
             </div>
+        </header>
 
-            <div
-                style="margin-top: 24px; text-align: center; font-size: 13px; color: #9aabbc; border-top: 1px solid #f0f4f9; padding-top: 18px;">
-                <i class="fas fa-code" style="margin-right: 6px;"></i>
-                Click any report card to open it.
+        <div class="metastrip">
+            <div class="meta-cell"><span class="meta-label">source</span><span class="meta-value">logs/server.log</span>
+            </div>
+            <div class="meta-cell"><span class="meta-label">offset</span><span class="meta-value"
+                    id="byteOffset">184,203</span></div>
+            <div class="meta-cell"><span class="meta-label">schema</span><span
+                    class="meta-value">(ip)(method)(status)</span></div>
+            <div class="meta-cell"><span class="meta-label">rate</span><span class="meta-value" id="parseRate">—
+                    entries/s</span></div>
+            <div class="meta-cell"><span class="meta-label">clients</span><span class="meta-value">1 dashboard</span>
             </div>
         </div>
+
+        <div class="main">
+
+            <section class="stream-panel">
+                <div class="panel-head">
+                    <span class="panel-title">Live report stream</span>
+                    <div class="filter-row" id="filterRow">
+                        <button class="filter-chip active" data-filter="all">all</button>
+                        <button class="filter-chip" data-filter="rate">rate</button>
+                        <button class="filter-chip" data-filter="scan">scan</button>
+                        <button class="filter-chip" data-filter="error">error</button>
+                    </div>
+                </div>
+                <div class="stream" id="stream">
+                    <div class="inserter">$INSERTER$</div>
+                </div>
+                <div class="footnote">payloads shown as emitted by <code>reporter</code> — JSON-escaped, fields matched
+                    against the active schema</div>
+            </section>
+
+            <aside class="rail">
+
+                <div class="rail-card rate">
+                    <div class="rail-card-head">
+                        <span class="rail-card-title">Request rate</span>
+                        <span class="rail-card-count" id="rateCount">0</span>
+                    </div>
+                    <div class="sparkline-wrap"><svg id="sparkRate" viewBox="0 0 260 36"
+                            preserveAspectRatio="none"></svg></div>
+                    <div class="rail-card-foot"><span>threshold 40 req/s</span><span id="rateFoot">—</span></div>
+                </div>
+
+                <div class="rail-card scan">
+                    <div class="rail-card-head">
+                        <span class="rail-card-title">404 bursts</span>
+                        <span class="rail-card-count" id="scanCount">0</span>
+                    </div>
+                    <div class="sparkline-wrap"><svg id="sparkScan" viewBox="0 0 260 36"
+                            preserveAspectRatio="none"></svg></div>
+                    <div class="rail-card-foot"><span>window 60s</span><span id="scanFoot">—</span></div>
+                </div>
+
+                <div class="rail-card error">
+                    <div class="rail-card-head">
+                        <span class="rail-card-title">Error spikes</span>
+                        <span class="rail-card-count" id="errorCount">0</span>
+                    </div>
+                    <div class="sparkline-wrap"><svg id="sparkError" viewBox="0 0 260 36"
+                            preserveAspectRatio="none"></svg></div>
+                    <div class="rail-card-foot"><span>baseline 2.1%</span><span id="errorFoot">—</span></div>
+                </div>
+
+                <div class="rail-card window-card">
+                    <span class="rail-card-title">Sliding window</span>
+                    <div class="window-viz" id="windowViz"></div>
+                    <div class="window-caption"><span>oldest</span><span id="windowSize">512
+                            entries</span><span>newest</span></div>
+                </div>
+                <div class="rail-card top-ips-card">
+                    <span class="rail-card-title">Top source IPs</span>
+                    <div id="topIps"></div>
+                </div>
+            </aside>
+        </div>
     </div>
+    <script src="script.js"></script>
 </body>
-<script>
-    let file_count = document.body.querySelector(".file_count");
-    let reports = document.body.querySelector(".report-grid");
-    window.onload = e => {
-        file_count.innerHTML = reports.childElementCount - 1;
-    };
-</script>
 
 </html>

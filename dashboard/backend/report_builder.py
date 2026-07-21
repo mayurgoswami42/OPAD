@@ -4,6 +4,25 @@ import json
 class ReportBuilder:
     def __init__(self):
         self.__REPORT_ID: int = -1
+        self.__map: dict[str : str] = {
+            "MAX_REQUESTS_FROM_A_IP" : "error",
+            "DIRECTORY_ATTACK" : "scan",
+            "SPIKE_ERROR_RATE" : "rate"
+        }
+
+    def __format_report(self, json_obj) -> str:
+        json_code = ""
+        for key, value in json_obj.items():
+            v_class = 'v'
+            if key == 'user_ip':
+                v_class += ' hl-ip'
+            if key == 'status':
+                v_class += ' hl-status'
+            if key == 'method':
+                v_class += ' hl-method'
+            _value = self.__esc(value)
+            json_code += f'  <span class="k">"{key}"</span><span class="punct">: </span><span class="{v_class}">{_value}</span><br>'
+        return json_code
 
     def __esc(self, value: str) -> str:
         return html.escape(str(value), quote=True)
@@ -26,6 +45,10 @@ class ReportBuilder:
             report_card = report_card.replace("$ANOMALY_TYPE$", self.__esc(json_object["anomaly_type"]))
             report_card = report_card.replace("$DATE$", self.__esc(json_object["date"]))
             report_card = report_card.replace("$TIME$", self.__esc(json_object["time"]))
+            if json_object["anomaly_type"] in self.__map:
+                report_card = report_card.replace("$ANOMALY_CLASS$", self.__map[json_object["anomaly_type"]])
+            report_card = report_card.replace("$IP$", self.__esc(json_object["user_ip"]))
+            report_card = report_card.replace("$JSON_HTML$", self.__format_report(json_object))
             report_card = report_card.replace("$REPORT_LINK$", url)
 
         with open("frontend/index.html", "r+") as file:

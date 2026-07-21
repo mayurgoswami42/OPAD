@@ -64,6 +64,14 @@ int detection_loop(std::string log_path, SocketServer *sock_server)
     return 0;
 }
 
+void serve_forever(SocketServer *sock_server)
+{
+    while (true)
+    {
+        sock_server->serve();
+    }
+}
+
 int main(int argc, char *argv[])
 {
     if (argc < 2)
@@ -75,7 +83,7 @@ int main(int argc, char *argv[])
     SocketServer sock_server(5555);
 
     std::thread detection(detection_loop, argv[1], &sock_server);
-    std::thread server_thread(&SocketServer::serve, &sock_server);
+    std::thread server_thread(serve_forever, &sock_server);
 
     DEBUG_LOG("All logs are parsed and detector scanned!");
     server_thread.join();

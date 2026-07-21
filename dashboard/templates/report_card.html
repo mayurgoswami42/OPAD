@@ -1,13 +1,12 @@
-<div class="report-card">
-    <div class="report-icon">
-        <i class="fas fa-exclamation-triangle"></i>
+<div class="ticket" data-kind="error" data="$REPORT_LINK$">
+    <div class="ticket-head">
+        <span class="severity-tag $ANOMALY_CLASS$">$ANOMALY_TYPE$</span>
+        <span class="ticket-type">$ANOMALY_TYPE$</span>
+        <span class="ticket-date">$DATE$</span>
+        <span class="ticket-time">$TIME$</span>
     </div>
-    <div class="report-title">$ANOMALY_TYPE$</div>
-    <div class="report-desc">
-        <div class="date">$DATE$</div>
-        <div class="date">$TIME$</div>
+    <div class="ticket-ip">$IP$</div>
+    <div class="payload"><span class="punct">{</span>
+$JSON_HTML$<span class="punct">}</span>
     </div>
-    <a href="$REPORT_LINK$" class="report-link">
-        View report <i class="fas fa-arrow-right arrow"></i>
-    </a>
 </div>

@@ -5,11 +5,18 @@ import time
 import struct
 
 class SocketClient:
-    def __init__(self, on_report: Callable[[str], None], host: str, port: int):
+    def __init__(self, on_report: Callable[[str], None], send_speed: Callable[[str], None], host: str, port: int):
         self.host: str = host
         self.port: int = port
         self.on_report: Callable[[str], None] = on_report
+        self.send_speed: Callable[[str], None] = send_speed
         self.running = False
+
+    def __distinguish(self, data: str):
+        if 'speed' in str:
+            self.send_speed(data)
+        else:
+            self.on_report(data)
 
     def stop(self):
         self.running = False
@@ -56,5 +63,5 @@ class SocketClient:
                 except UnicodeDecodeError:
                     continue
 
-                self.on_report(text)
+                self.__distinguish(text)
                 s.sendall(b"Data received")

@@ -1,7 +1,8 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import posixpath
 from urllib.parse import unquote
-from collections import deque
+import queue
+# from collections import deque
 import os
 
 import time
@@ -12,9 +13,13 @@ PORT: int = 8080
 SOURCE_DIR: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_PATH: str = os.path.join(SOURCE_DIR, "frontend")
 
+report_queue = queue.Queue()
+
+def add_task(task: str) -> None:
+    report_queue.put(task)
+
 class RequestHandler(BaseHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        self.report_queue = deque()
         super().__init__(*args, **kwargs)
     
     def __safe_join(self, base_dir: str, url_path: str) -> str | None:
@@ -78,16 +83,18 @@ class RequestHandler(BaseHTTPRequestHandler):
 
             try:
                 while True:
-                    if len(self.report_queue) > 0:
-                        task_str = self.report_queue[0]
-                        self.wfile.write(task_str.encode('utf-8'))
+                    try:
+                        task_str = report_queue.get(timeout=1.0)
+                        self.wfile.write(f"data: {task_str}\n\n".encode('utf-8'))
                         self.wfile.flush()
 
-                        time.sleep(1)
+                    except queue.Empty:
+                        self.wfile.write(b": heartbeat\n\n")
+                        self.wfile.flush()
 
             except (ConnectionAbortedError, BrokenPipeError) as e:
                 print(f'[SERVER::ERROR] Client disconnected: {e}')
-                return
+            return
 
         elif path.endswith(".css"):
             _path: str | None = self.__safe_join(f"{BASE_PATH}/styles", path)
@@ -111,7 +118,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.__send_page_404(path)
 
 def run() -> None:
-    server = HTTPServer((HOST, PORT), RequestHandler)
+    server = ThreadingHTTPServer((HOST, PORT), RequestHandler)
     print(f"Server is running on [{HOST}:{PORT}]")
     server.serve_forever()
     server.server_close()

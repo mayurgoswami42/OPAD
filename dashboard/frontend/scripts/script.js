@@ -10,11 +10,11 @@ let error_data = Array(30).fill(0);
 let rate_data = Array(30).fill(0);
 
 let slide_data = (json_obj) => {
-    scan_data.push(json_obj["scan_speed"]);
+    scan_data.push(parseFloat(json_obj["scan_speed"]));
     scan_data.shift();
-    error_data.push(json_obj["error_speed"]);
+    error_data.push(parseFloat(json_obj["error_speed"]));
     error_data.shift();
-    rate_data.push(json_obj["rate_speed"]);
+    rate_data.push(parseFloat(json_obj["rate_speed"]));
     rate_data.shift();
 };
 

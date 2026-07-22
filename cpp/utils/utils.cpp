@@ -72,3 +72,53 @@ utils::time utils::parse_date_time(const std::string &date, const std::string &t
 
     return tp + frac_duration;
 }
+
+
+std::string utils::stringify(std::string str)
+{
+    std::string out;
+    out += '"';
+    for (char &ch : str)
+    {
+        switch (ch)
+        {
+            case '"':
+            out += "\\\"";
+            break;
+            case '\\':
+            out += "\\\\";
+            break;
+            case '\b':
+            out += "\\b";
+            break;
+            case '\f':
+            out += "\\f";
+            break;
+            case '\n':
+            out += "\\n";
+            break;
+            case '\r':
+            out += "\\r";
+            break;
+            case '\t':
+            out += "\\t";
+            break;
+            default:
+            out += ch;
+            break;
+        }
+    }
+    
+    out += '"';
+    return out;
+}
+
+std::string utils::stringify(int num)
+{
+    return "\"" + std::to_string(num) + "\"";
+}
+
+std::string utils::stringify(double num)
+{
+    return "\"" + std::to_string(num) + "\"";
+}

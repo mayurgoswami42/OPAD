@@ -7,9 +7,11 @@
 #include <vector>
 #include <chrono>
 #include <utility>
+#include <sstream>
 
 #include "anomaly_struct.hpp"
 #include "utils/utils.hpp"
+#include "utils/debug.hpp"
 
 struct TimeNCount
 {
@@ -23,14 +25,13 @@ class Detector
 public:
     typedef std::unordered_map<std::string, std::string> Log;
 private:
-    const size_t buf_size{};
-    const size_t sus_req_limit{};
+    const size_t buf_size{}, sus_req_limit{};
     const double max_speed{};
+    double rate_speed{}, scan_speed{}, error_speed{};
     std::queue<Log> window{};
     std::vector<std::pair<Log, Anomaly>> sus_logs{};
     std::unordered_map<std::string, TimeNCount> ip_frequency{};
-    TimeNCount errors{};
-    TimeNCount not_found{};
+    TimeNCount errors{}, not_found{};
     void perform_checks(const size_t &ip_count, const Log &log);
     void window_increment(const Log &log);
     void window_decrement(const Log &log);
@@ -53,4 +54,5 @@ public:
     size_t sus_log_counts() const;
     const std::vector<std::pair<Log, Anomaly>> &get_sus_logs() const;
     const std::queue<Log> &get_log_buffer() const;
+    const std::string get_speed_snap();
 };

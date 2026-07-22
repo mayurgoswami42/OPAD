@@ -13,7 +13,7 @@ class SocketClient:
         self.running = False
 
     def __distinguish(self, data: str):
-        if 'speed' in str:
+        if 'speed' in data:
             self.send_speed(data)
         else:
             self.on_report(data)

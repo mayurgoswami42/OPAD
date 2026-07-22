@@ -1,7 +1,5 @@
 #include "detector.hpp"
 
-#include "utils/debug.hpp"
-
 Detector::Detector(const std::span<const Log> &server_logs, const size_t buffer_size, const size_t sus_req_limit, double attack_threshold) : Detector(buffer_size, sus_req_limit, attack_threshold)
 {
     // set the insert initially to do_insert, which will switch to process when window is of buffer_size
@@ -34,6 +32,31 @@ const double Detector::req_speed(const utils::time &i_time, const utils::time &f
     return speed;
 }
 
+const std::string Detector::get_speed_snap()
+{
+    std::ostringstream ss;
+    ss << "{";
+    ss << utils::stringify("scan_speed");
+    ss << ":";
+    ss << utils::stringify(scan_speed);
+    ss << ",";
+    ss << utils::stringify("error_speed");
+    ss << ":";
+    ss << utils::stringify(error_speed);
+    ss << ",";
+    ss << utils::stringify("rate_speed");
+    ss << ":";
+    ss << utils::stringify(rate_speed);
+    ss << "}";
+
+    scan_speed = 0.0;
+    error_speed = 0.0;
+    rate_speed = 0.0;
+
+    return ss.str();
+}
+
+
 // we are not calculating the speed by count/(last sus log time - first sus log time)
 // because if first request and the second request has the gap and then attack starts then count/(delay + last - second) this could decrease the speed
 // and the first request padding can save the attack from being flagged
@@ -45,10 +68,10 @@ void Detector::window_increment(const Log &log)
 
     TimeNCount &ip = ip_frequency[log.at("user_ip")];
 
-    double speed = req_speed(not_found.prev_time, log_time);
+    rate_speed = req_speed(ip.prev_time, log_time);
 
     // arguments order matters initial first and final second
-    if (req_speed(ip.prev_time, log_time) >= max_speed) // if requests are faster than the max_speed
+    if (rate_speed >= max_speed) // if requests are faster than the max_speed
         ip.sus_count++; // increment the log count of ip
 
     ip.req_count++;    
@@ -57,7 +80,8 @@ void Detector::window_increment(const Log &log)
     // frequency count for error spike
     if (log.at("log_type") == "ERROR")
     {
-        if (req_speed(errors.prev_time, log_time) >= max_speed) // if errors are very frequent
+        error_speed = req_speed(errors.prev_time, log_time);
+        if (error_speed >= max_speed) // if errors are very frequent
             errors.sus_count++;
         errors.req_count++;    
         errors.prev_time = log_time;
@@ -66,7 +90,8 @@ void Detector::window_increment(const Log &log)
     // frequency count for directory attack
     if (log.at("status") == "404")
     {
-        if (req_speed(not_found.prev_time, log_time) >= max_speed) // if frequent requests to wrong directory
+        scan_speed = req_speed(not_found.prev_time, log_time);
+        if (scan_speed >= max_speed) // if frequent requests to wrong directory
             not_found.sus_count++;
         not_found.req_count++;
         not_found.prev_time = log_time;

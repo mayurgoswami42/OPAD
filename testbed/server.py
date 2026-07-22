@@ -78,7 +78,6 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.__send_response(404, "text/html", "File Not Found")
 
     def log_message(self, format, *args):
-        print("logged")
         client_ip = self.address_string()
         if TEST_MODE: client_ip = self.headers.get("X-Test-IP", client_ip)
         logging.info(f"{client_ip} {format % args}")

@@ -20,7 +20,15 @@ let slide_data = (json_obj) => {
 
 event_source.onmessage = event => {
     const data = JSON.parse(event.data);
-    slide_data(data);
+    if (data.command === "reload")
+    {
+        console.log(true);
+        location.reload();
+    }
+    else
+    {
+        slide_data(data);
+    }
 };
 
 let get_tag = data => {

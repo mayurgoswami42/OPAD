@@ -5,18 +5,19 @@ import time
 import struct
 
 class SocketClient:
-    def __init__(self, on_report: Callable[[str], None], send_speed: Callable[[str], None], host: str, port: int):
+    def __init__(self, on_report: Callable[[str], None], add_task: Callable[[str], None], host: str, port: int):
         self.host: str = host
         self.port: int = port
         self.on_report: Callable[[str], None] = on_report
-        self.send_speed: Callable[[str], None] = send_speed
+        self.add_task: Callable[[str], None] = add_task
         self.running = False
 
     def __distinguish(self, data: str):
         if 'speed' in data:
-            self.send_speed(data)
+            self.add_task(data)
         else:
             self.on_report(data)
+            self.add_task("{\"command\":\"reload\"}")
 
     def stop(self):
         self.running = False

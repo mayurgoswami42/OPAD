@@ -55,8 +55,8 @@
                     </div>
                 </div>
                 <div class="stream" id="stream">
-                    <div class="inserter">$INSERTER$</div>
-                </div>
+                    <!-- $INSERT_MARKER$ -->
+                </div> <!-- stream ends here-->
                 <div class="footnote">payloads shown as emitted by <code>reporter</code> — JSON-escaped, fields matched
                     against the active schema</div>
             </section>
@@ -65,12 +65,12 @@
 
                 <div class="rail-card rate">
                     <div class="rail-card-head">
-                        <span class="rail-card-title">Request rate</span>
+                        <span class="rail-card-title">Max ip request rate</span>
                         <span class="rail-card-count" id="rateCount">0</span>
                     </div>
                     <div class="sparkline-wrap"><svg id="sparkRate" viewBox="0 0 260 36"
                             preserveAspectRatio="none"></svg></div>
-                    <div class="rail-card-foot"><span>threshold 40 req/s</span><span id="rateFoot">—</span></div>
+                    <div class="rail-card-foot"><span>threshold $THRESHOLD_REQUEST_SPEED$</span><span id="rateFoot">—</span></div>
                 </div>
 
                 <div class="rail-card scan">
@@ -80,7 +80,7 @@
                     </div>
                     <div class="sparkline-wrap"><svg id="sparkScan" viewBox="0 0 260 36"
                             preserveAspectRatio="none"></svg></div>
-                    <div class="rail-card-foot"><span>window 60s</span><span id="scanFoot">—</span></div>
+                    <div class="rail-card-foot"><span>threshold $THRESHOLD_REQUEST_SPEED$</span><span id="scanFoot">—</span></div>
                 </div>
 
                 <div class="rail-card error">
@@ -90,7 +90,7 @@
                     </div>
                     <div class="sparkline-wrap"><svg id="sparkError" viewBox="0 0 260 36"
                             preserveAspectRatio="none"></svg></div>
-                    <div class="rail-card-foot"><span>baseline 2.1%</span><span id="errorFoot">—</span></div>
+                    <div class="rail-card-foot"><span>threshold $THRESHOLD_REQUEST_SPEED$</span><span id="errorFoot">—</span></div>
                 </div>
 
                 <div class="rail-card window-card">

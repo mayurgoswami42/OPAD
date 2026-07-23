@@ -1,3 +1,5 @@
+const stream_div = document.querySelector('#stream');
+
 const spark_rate = document.querySelector('#sparkRate');
 const spark_scan = document.querySelector('#sparkScan');
 const spark_error = document.querySelector('#sparkError');
@@ -9,6 +11,8 @@ let scan_data = Array(30).fill(0);
 let error_data = Array(30).fill(0);
 let rate_data = Array(30).fill(0);
 
+let data_kinds = {"DIRECTORY_ATTACK" : "scan", "MAX_REQUESTS_FROM_A_IP" : "rate", "SPIKE_ERROR_RATE" : "error"};
+
 let slide_data = (json_obj) => {
     scan_data.push(parseFloat(json_obj["scan_speed"]));
     scan_data.shift();
@@ -18,12 +22,47 @@ let slide_data = (json_obj) => {
     rate_data.shift();
 };
 
+function escape_html(s){
+  return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+function build_payload(obj) {
+  const rows = Object.entries(obj).map(([k, v]) => {
+    let v_class = 'v';
+    if (k === 'ip') v_class += ' hl-ip';
+    if (k === 'status') v_class += ' hl-status';
+    if (k === 'method') v_class += ' hl-method';
+
+    const vStr = typeof v === 'string' ? `"${escape_html(v)}"` : v;
+    return ` <span class="k">"${k}"</span><span class="punct">: </span><span class="${v_class}">${vStr}</span>`;
+  });
+
+  return `<span class="punct">{</span>\n${rows.join(',\n')}\n<span class="punct">}</span>`;
+}
+
+let prepend_element = data => {
+    let div = document.createElement('div');
+    div.className = "ticket";
+    div.dataset.kind = data_kinds[data["anomaly_type"]];
+    div.innerHTML = `<div class="ticket-head">
+        <span class="severity-tag ${div.dataset.kind}">${data["anomaly_type"]}</span>
+        <span class="ticket-type">${data["anomaly_type"]}</span>
+        <span class="ticket-date">${data["date"]}</span>
+        <span class="ticket-time">${data["time"]}</span>
+    </div>
+    <div class="ticket-ip">${data["user_ip"]}</div>
+    <div class="payload">${build_payload(data)}
+    </div>`;
+
+    stream_div.prepend(div);
+}
+
 event_source.onmessage = event => {
     const data = JSON.parse(event.data);
-    if (data.command === "reload")
+    console.log(data);
+    if (data.anomaly_type !== undefined)
     {
-        console.log(true);
-        location.reload();
+        prepend_element(data);
     }
     else
     {

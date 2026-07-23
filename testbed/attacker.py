@@ -31,7 +31,7 @@ def send_requests(random_ips = False, random_dir = False):
 
 threads = []
 
-send_requests(False, True)
+send_requests(True, True)
 
 # for i in range(100):
 #     threads.append(Thread(target=send_requests, args=(random.choice(state), random.choice(state))))

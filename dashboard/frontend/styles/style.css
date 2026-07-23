@@ -191,10 +191,6 @@ a {
     min-width: 0;
 }
 
-.inserter {
-    display: none;
-}
-
 .panel-head {
     display: flex;
     align-items: center;

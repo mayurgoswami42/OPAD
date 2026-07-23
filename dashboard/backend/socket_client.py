@@ -17,7 +17,7 @@ class SocketClient:
             self.add_task(data)
         else:
             self.on_report(data)
-            self.add_task("{\"command\":\"reload\"}")
+            self.add_task(data)
 
     def stop(self):
         self.running = False

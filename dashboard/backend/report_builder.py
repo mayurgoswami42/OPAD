@@ -38,7 +38,7 @@ class ReportBuilder:
         return self.__REPORT_ID
 
     def __update_home(self, json_object, url: str) -> None:
-        inserter: str = "<div class=\"inserter\">$INSERTER$</div>"
+        inserter: str = "<!-- $INSERT_MARKER$ -->"
         
         with open("templates/report_card.html", "r") as report_file:
             report_card = report_file.read()
@@ -54,7 +54,7 @@ class ReportBuilder:
         with open("frontend/index.html", "r+") as file:
             page: str = file.read()
 
-            page = page.replace(inserter, report_card + inserter)
+            page = page.replace(inserter, inserter + report_card)
 
             file.seek(0)
             file.truncate()

@@ -1,14 +1,16 @@
 #include "reader.hpp"
 #include "utils/debug.hpp"
 
-// just for debuging, reset log file offset to read from starting
-DEBUG_DECLARE(
-    void Reader::reset_offset()
-    {
-        std::cout << "reseting the offset for debuging purpose!" << std::endl;
-        offset = 0;
-    }
-);
+void Reader::reset_offset()
+{
+    std::cout << "reseting the offset!" << std::endl;
+    offset = 0;
+}
+
+int Reader::get_offset() const
+{
+    return offset;
+}
 
 // std::getline is not suitable for our case as the log files may be continuously getting written by server,
 // std::getline returns and stop writing line when it hits std::fstream::eof() or '\n' character
@@ -53,8 +55,14 @@ std::streampos Reader::read_offset() const
 // saves the current offset into the storage/.reader_offset
 std::streampos Reader::write_offset(std::streampos offset) const
 {
-    std::fstream o_state(STATE_FILE, std::ios::trunc | std::ios::out);
-    o_state << offset;
+    std::ofstream o_state(STATE_FILE, std::ios::trunc);
+
+    if (!o_state)
+    {
+        std::cout << "ERROR::READER:: cant open reader offset file! (line: " << __LINE__ << ")" << std::endl;
+        return offset;
+    }
+    o_state << static_cast<long long>(offset);
 
     return offset;
 }
@@ -63,6 +71,11 @@ Reader::Reader()
 {
     offset = read_offset();
     status = true;
+}
+
+Reader::~Reader()
+{
+    write_offset(offset); // save offset
 }
 
 std::vector<std::string> Reader::read_logs(std::string file_name)
@@ -93,8 +106,6 @@ std::vector<std::string> Reader::read_logs(std::string file_name)
         ifile.seekg(0, std::ios::end);
         offset = ifile.tellg();
     }
-
-    write_offset(offset); // save offset
 
     return logs;
 }

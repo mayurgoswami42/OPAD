@@ -35,7 +35,6 @@ const double Detector::req_speed(const utils::time &i_time, const utils::time &f
 const std::string Detector::get_speed_snap()
 {
     std::ostringstream ss;
-    ss << "{";
     ss << utils::stringify("scan_speed");
     ss << ":";
     ss << utils::stringify(scan_speed);
@@ -47,7 +46,6 @@ const std::string Detector::get_speed_snap()
     ss << utils::stringify("rate_speed");
     ss << ":";
     ss << utils::stringify(rate_speed);
-    ss << "}";
 
     scan_speed = 0.0;
     error_speed = 0.0;

@@ -10,6 +10,9 @@
 
 #include "utils/debug.hpp"
 
+utils::time _start_time{};
+double tool_speed{};
+
 [[maybe_unused]] void print(Detector::Log log) // debuging purpose only
 {
     std::cout << "date:" << log.at("date") << std::endl;
@@ -25,21 +28,28 @@
     std::cout << "\n\n" << std::endl;
 }
 
-int detection_loop(std::string log_path, SocketServer *sock_server, Detector *detector)
+int detection_loop(std::string log_path, SocketServer *sock_server, Detector *detector, Reader *reader)
 {
-    Reader reader;
-    DEBUG_DECLARE(reader.reset_offset());
-
     Parser parser("(date)(time)(log_type)(user_ip)(method)(path)(protocol)(version)(status)(message)", R"re((\d{4}-\d{2}-\d{2})\s+((?:\d{2}:){2}\d{2},\d{3})\s+(INFO|ERROR|WARN|FATAL)\s+((?:\d{1,3}\.){3}\d{1,3})\s+"(GET|POST|PUT|DELETE|PATCH)\s+(\S+)\s+((?:HTTP|HTTPS)/(\d(?:\.\d)?))"\s+(\d{3})\s+(\S+))re");
     Reporter reporter;
 
+    utils::time start{};
+
     while (true)
     {
-        std::vector<std::string> log_lines = reader.read_logs(log_path);
-        if (!reader.status)
+        start = utils::now();
+        std::vector<std::string> log_lines = reader->read_logs(log_path);
+
+        if (!reader->status)
         {
             DEBUG_LOG("MAIN::ERROR:: Reader returned with bad status! (line " << __LINE__ << ")");
             return 1;
+        }
+
+        if (log_lines.size() == 0)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            continue;
         }
 
         for (std::string &s : log_lines)
@@ -58,19 +68,38 @@ int detection_loop(std::string log_path, SocketServer *sock_server, Detector *de
                 detector->reset();
             }
         }
+
+        if (log_lines.size() > 0)
+            tool_speed = log_lines.size()/((utils::duration)(utils::now() - start)).count();
     }
 
     return 0;
 }
 
-void send_speeds(SocketServer *sock_server, Detector *detector)
+void additional_data(SocketServer *sock_server, Detector *detector, Reader *reader)
 {
+    double prev_tool_speed = 0;
     while (true)
     {
-        std::string speeds = detector->get_speed_snap();
-        sock_server->add_task(speeds);
+        if (prev_tool_speed == tool_speed)
+        {
+            prev_tool_speed = tool_speed;
+            tool_speed = 0.0;
+        }
+        else prev_tool_speed = tool_speed;
+        utils::duration uptime = utils::now() - _start_time;
+        std::string data = "{";
+        data += detector->get_speed_snap();
+        data += ",";
+        data += utils::stringify("offset") + ":" + utils::stringify(reader->get_offset());
+        data += ",";
+        data += utils::stringify("uptime") + ":" + utils::stringify(uptime.count());
+        data += ",";
+        data += utils::stringify("tool_speed") + ":" + utils::stringify(tool_speed);
+        data += "}";
+        sock_server->add_task(data);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 }
 
@@ -82,8 +111,10 @@ void serve_forever(SocketServer *sock_server)
     }
 }
 
+
 int main(int argc, char *argv[])
 {
+    _start_time = utils::now();
     if (argc < 2)
     {
         std::cout << "cpp:exit:1";
@@ -92,10 +123,13 @@ int main(int argc, char *argv[])
 
     SocketServer sock_server(5555);
     Detector detector(50000, 5000, 30);
+    Reader reader;
 
-    std::thread detection(detection_loop, argv[1], &sock_server, &detector);
+    std::cout << reader.get_offset() << std::endl;
+
+    std::thread detection(detection_loop, argv[1], &sock_server, &detector, &reader);
     std::thread server_thread(serve_forever, &sock_server);
-    std::thread speed_thread(send_speeds, &sock_server, &detector);
+    std::thread speed_thread(additional_data, &sock_server, &detector, &reader);
 
     DEBUG_LOG("All logs are parsed and detector scanned!");
     server_thread.join();

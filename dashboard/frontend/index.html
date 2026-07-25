@@ -25,7 +25,7 @@
                 <div class="status-item"><span class="dot pulse" id="connDot"></span> socket <span class="status-value"
                         id="connLabel">connected</span></div>
                 <div class="status-item">window <span class="status-value" id="windowState">steady-state</span></div>
-                <div class="status-item">uptime <span class="status-value" id="uptime">00:00:00</span></div>
+                <div class="status-item">uptime <span class="status-value" id="uptime">--:--:--</span></div>
             </div>
         </header>
 
@@ -33,9 +33,9 @@
             <div class="meta-cell"><span class="meta-label">source</span><span class="meta-value">logs/server.log</span>
             </div>
             <div class="meta-cell"><span class="meta-label">offset</span><span class="meta-value"
-                    id="byteOffset">184,203</span></div>
+                    id="byteOffset">-</span></div>
             <div class="meta-cell"><span class="meta-label">schema</span><span
-                    class="meta-value">(ip)(method)(status)</span></div>
+                    class="meta-value">(date)(time)(log_type)(user_ip)(method)(path)(protocol)(version)(status)(message)</span></div>
             <div class="meta-cell"><span class="meta-label">rate</span><span class="meta-value" id="parseRate">—
                     entries/s</span></div>
             <div class="meta-cell"><span class="meta-label">clients</span><span class="meta-value">1 dashboard</span>
@@ -65,12 +65,12 @@
 
                 <div class="rail-card rate">
                     <div class="rail-card-head">
-                        <span class="rail-card-title">Max ip request rate</span>
+                        <span class="rail-card-title">Ip request rate</span>
                         <span class="rail-card-count" id="rateCount">0</span>
                     </div>
                     <div class="sparkline-wrap"><svg id="sparkRate" viewBox="0 0 260 36"
                             preserveAspectRatio="none"></svg></div>
-                    <div class="rail-card-foot"><span>threshold $THRESHOLD_REQUEST_SPEED$</span><span id="rateFoot">—</span></div>
+                    <div class="rail-card-foot"><span>threshold </span><span id="rateFoot">30 req/s</span></div>
                 </div>
 
                 <div class="rail-card scan">
@@ -80,7 +80,7 @@
                     </div>
                     <div class="sparkline-wrap"><svg id="sparkScan" viewBox="0 0 260 36"
                             preserveAspectRatio="none"></svg></div>
-                    <div class="rail-card-foot"><span>threshold $THRESHOLD_REQUEST_SPEED$</span><span id="scanFoot">—</span></div>
+                    <div class="rail-card-foot"><span>threshold </span><span id="scanFoot">30 req/s</span></div>
                 </div>
 
                 <div class="rail-card error">
@@ -90,7 +90,7 @@
                     </div>
                     <div class="sparkline-wrap"><svg id="sparkError" viewBox="0 0 260 36"
                             preserveAspectRatio="none"></svg></div>
-                    <div class="rail-card-foot"><span>threshold $THRESHOLD_REQUEST_SPEED$</span><span id="errorFoot">—</span></div>
+                    <div class="rail-card-foot"><span>threshold </span><span id="errorFoot">30 req/s</span></div>
                 </div>
 
                 <div class="rail-card window-card">

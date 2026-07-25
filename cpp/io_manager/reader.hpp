@@ -10,10 +10,13 @@ class Reader
 {
 public:
     Reader();
+    ~Reader();
     std::vector<std::string> read_logs(std::string);
-    DEBUG_DECLARE(void reset_offset()); // just for debuging purpose
+    void reset_offset();
     bool status = false;
-    private:
+    int get_offset() const;
+    
+private:
     static constexpr const char* STATE_FILE = "cpp/storage/.reader_offset"; // store offset of log file
     std::streampos offset{};
     std::streampos read_offset() const;

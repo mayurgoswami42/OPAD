@@ -1,11 +1,25 @@
-const stream_div = document.querySelector('#stream');
+const elem_stream = document.querySelector('#stream');
 
-const spark_rate = document.querySelector('#sparkRate');
-const spark_scan = document.querySelector('#sparkScan');
-const spark_error = document.querySelector('#sparkError');
+const elem_spark_rate = document.querySelector('#sparkRate');
+const elem_spark_scan = document.querySelector('#sparkScan');
+const elem_spark_error = document.querySelector('#sparkError');
+
+const elem_rate_count = document.querySelector('#rateCount');
+const elem_scan_count = document.querySelector('#scanCount');
+const elem_error_count = document.querySelector('#errorCount');
+
+const elem_uptime = document.querySelector("#uptime");
+const elem_offset = document.querySelector("#byteOffset");
+const elem_speed = document.querySelector("#parseRate");
+
+const elem_socket_status = document.querySelector("#connDot");
 
 const w = 260, h = 36;
 const event_source = new EventSource('/events');
+var prev_uptime = -1;
+var up_seconds = 0;
+var connection_alive = false;
+var connection_update = false;
 
 let scan_data = Array(30).fill(0);
 let error_data = Array(30).fill(0);
@@ -13,13 +27,31 @@ let rate_data = Array(30).fill(0);
 
 let data_kinds = {"DIRECTORY_ATTACK" : "scan", "MAX_REQUESTS_FROM_A_IP" : "rate", "SPIKE_ERROR_RATE" : "error"};
 
+let format_time = seconds => {
+    return new Date(seconds * 1000).toISOString().slice(11, 19);
+};
+
 let slide_data = (json_obj) => {
-    scan_data.push(parseFloat(json_obj["scan_speed"]));
+    let scan_speed = parseFloat(json_obj["scan_speed"]).toFixed(2);
+    elem_scan_count.innerHTML = scan_speed + "<sub> req/s</sub>";
+    scan_data.push(scan_speed);
     scan_data.shift();
-    error_data.push(parseFloat(json_obj["error_speed"]));
+    
+    let error_speed = parseFloat(json_obj["error_speed"]).toFixed(2);
+    elem_error_count.innerHTML = error_speed + "<sub> req/s</sub>";
+    error_data.push(error_speed);
     error_data.shift();
-    rate_data.push(parseFloat(json_obj["rate_speed"]));
+
+    let rate_speed = parseFloat(json_obj["rate_speed"]).toFixed(2);
+    elem_rate_count.innerHTML = rate_speed + "<sub> req/s</sub>";
+    rate_data.push(rate_speed);
     rate_data.shift();
+
+    up_seconds = json_obj["uptime"];
+
+    elem_offset.innerHTML = json_obj["offset"];
+    console.log(json_obj["tool_speed"]);
+    elem_speed.innerHTML = json_obj["tool_speed"] + " logs/s";
 };
 
 function escape_html(s){
@@ -54,12 +86,12 @@ let prepend_element = data => {
     <div class="payload">${build_payload(data)}
     </div>`;
 
-    stream_div.prepend(div);
+    elem_stream.prepend(div);
 }
 
 event_source.onmessage = event => {
+    connection_alive = true;
     const data = JSON.parse(event.data);
-    console.log(data);
     if (data.anomaly_type !== undefined)
     {
         prepend_element(data);
@@ -82,12 +114,34 @@ let get_tag = data => {
 };
 
 setInterval(() => {
+    if (!connection_alive)
+    {
+        elem_socket_status.classList.remove("pulse");
+        elem_socket_status.classList.add("off");
+        connection_update = false;
+    }
+    
+    if (connection_alive && !connection_update)
+    {
+        elem_socket_status.classList.remove("off");
+        elem_socket_status.classList.add("pulse");
+        connection_update = true;
+    }
+
     let rate_tags = get_tag(rate_data);
     let error_tags = get_tag(error_data);
     let scan_tags = get_tag(scan_data);
     
-    spark_rate.innerHTML = rate_tags.replaceAll("$COLOR$", "#B8860B");
-    spark_scan.innerHTML = scan_tags.replaceAll("$COLOR$", "#B54834");
-    spark_error.innerHTML = error_tags.replaceAll("$COLOR$", "#8B2E2E");
+    elem_spark_rate.innerHTML = rate_tags.replaceAll("$COLOR$", "#B8860B");
+    elem_spark_scan.innerHTML = scan_tags.replaceAll("$COLOR$", "#B54834");
+    elem_spark_error.innerHTML = error_tags.replaceAll("$COLOR$", "#8B2E2E");
 
+    if (prev_uptime == up_seconds)
+    {
+        connection_alive = false;
+    }
+
+    elem_uptime.innerHTML = format_time(up_seconds);
+
+    prev_uptime = up_seconds;
 }, 1000);

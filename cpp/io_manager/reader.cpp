@@ -1,5 +1,7 @@
+
 #include "reader.hpp"
 #include "utils/debug.hpp"
+#include "utils/utils.hpp"
 
 void Reader::reset_offset()
 {
@@ -14,6 +16,7 @@ int Reader::get_offset() const
 
 void Reader::close() const
 {
+    std::cout << "close called" << std::endl;
     write_offset(offset);
 }
 
@@ -92,6 +95,7 @@ std::vector<std::string> Reader::read_logs(std::string file_name)
     if (ifile.peek() == std::ifstream::traits_type::eof())
     {
         std::cout << "READER::INFO:: Log file is empty! (line " << __LINE__  << ")"<< std::endl;
+        utils::thread_sleep(1000);
         return {};
     }
 

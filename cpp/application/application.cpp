@@ -39,7 +39,7 @@ void Application::detection_loop(const std::string& log_path)
         
         if (log_lines.size() == 0)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            utils::thread_sleep(100);
             continue;
         }
         

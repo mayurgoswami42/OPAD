@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
     
     Application app(5555, 30, 5000, 50000);
 
-    app.run(argv[0]);
+    app.run(argv[1]);
     
     return 0;
 }

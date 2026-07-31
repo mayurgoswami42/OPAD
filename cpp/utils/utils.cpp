@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <thread>
 
 #include <iostream>
 
@@ -128,4 +129,9 @@ std::string utils::stringify(int num)
 std::string utils::stringify(double num)
 {
     return "\"" + std::to_string(num) + "\"";
+}
+
+void utils::thread_sleep(int milliseconds)
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
 }

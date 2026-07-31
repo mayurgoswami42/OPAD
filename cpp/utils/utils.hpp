@@ -17,6 +17,7 @@ namespace utils
     std::string stringify(double num);
     std::string stringify(std::string str);
 
+    void thread_sleep(int milliseconds);
 
     std::optional<utils::time> parse_date_time(const std::string &date, const std::string &time);
 

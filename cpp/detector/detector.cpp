@@ -62,7 +62,14 @@ const std::string Detector::get_speed_snap()
 void Detector::window_increment(const Log &log)
 {
     // log time of current log
-    utils::time log_time = utils::parse_date_time(log.at("date"), log.at("time")); // std::string to std::chrono::system_clock::time_point
+    std::optional<utils::time> return_value = utils::parse_date_time(log.at("date"), log.at("time")); // std::string to std::chrono::system_clock::time_point
+    if (!return_value.has_value())
+    {
+        std::cout << "DETECTOR::ERROR:: incorrect date or time format (line " << __LINE__ << ")" << std::endl;
+        return;
+    }
+
+    utils::time log_time = return_value.value();
 
     TimeNCount &ip = ip_frequency[log.at("user_ip")];
 

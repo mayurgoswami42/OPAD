@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <cstring>
 #include <sys/socket.h>
@@ -9,6 +11,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <optional>
+#include <atomic>
 
 #include "utils/debug.hpp"
 
@@ -28,8 +31,10 @@ private:
     int server_fd;
     const int _port;
     std::vector<int> clients_fds;
+    std::atomic<bool> server_running{true};
+    sockaddr_in server_addr{};
+    
     void remove_client(int clinet_index);
     void send_msg(int client_fd, std::string message);
-    // will be used in future
     std::optional<std::string> receive(int client_fd);
 };

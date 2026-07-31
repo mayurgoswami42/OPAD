@@ -8,11 +8,10 @@ SocketServer::SocketServer(int port) : _port(port)
     int opt = 1;
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
-    sockaddr_in addr{};
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = INADDR_ANY;
-    addr.sin_port = htons(port);
-    bind(server_fd, (sockaddr*)&addr, sizeof(addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(port);
+    bind(server_fd, (sockaddr*)&server_addr, sizeof(server_addr));
 }
 
 void SocketServer::remove_client(int client_index)
@@ -31,7 +30,7 @@ void SocketServer::remove_client(int client_index)
 void SocketServer::serve()
 {
     start(1); // control clients count, increase as needed
-    while (true)
+    while (server_running)
     {
         std::unique_lock lock(socket_mutex);
 
@@ -96,9 +95,16 @@ void SocketServer::start(int clients = 0)
 
 void SocketServer::stop()
 {
-    for (const int &client_fd : clients_fds)
+    server_running = false;
+
+    int wake_fd = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (wake_fd >= 0)
     {
-        close(client_fd);
+        connect(wake_fd, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+        close(wake_fd);
     }
-    close(server_fd);
+
+    for (int client_fd : clients_fds)
+        close(client_fd);
 }

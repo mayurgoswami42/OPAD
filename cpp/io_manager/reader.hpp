@@ -10,11 +10,11 @@ class Reader
 {
 public:
     Reader();
-    ~Reader();
     std::vector<std::string> read_logs(std::string);
     void reset_offset();
     bool status = false;
     int get_offset() const;
+    void close() const;
     
 private:
     static constexpr const char* STATE_FILE = "cpp/storage/.reader_offset"; // store offset of log file

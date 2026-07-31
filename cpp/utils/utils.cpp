@@ -4,6 +4,8 @@
 #include <sstream>
 #include <algorithm>
 
+#include <iostream>
+
 #include "utils.hpp"
 
 std::string utils::time_str()
@@ -25,8 +27,13 @@ utils::time utils::now()
     return zt;
 }
 
-utils::time utils::parse_date_time(const std::string &date, const std::string &time)
+std::optional<utils::time> utils::parse_date_time(const std::string &date, const std::string &time)
 {
+    if (date.size() <= 0 || time.size() <= 0)
+    {
+        return std::nullopt;
+    }
+    
     std::string fixed_time = time;
     std::replace(fixed_time.begin(), fixed_time.end(), ',', '.');
 
@@ -36,12 +43,12 @@ utils::time utils::parse_date_time(const std::string &date, const std::string &t
 
     // Parse date
     if (sscanf(date.c_str(), "%d-%d-%d", &year, &month, &day) != 3) {
-        throw std::runtime_error("Failed to parse date: " + date);
+        throw std::runtime_error("UTILS::ERROR:: Failed to parse date: " + date);
     }
 
     // Parse time
     if (sscanf(fixed_time.c_str(), "%d:%d:%d", &hour, &minute, &second) < 2) {
-        throw std::runtime_error("Failed to parse time: " + fixed_time);
+        throw std::runtime_error("UTILS::ERROR:: Failed to parse time: " + fixed_time);
     }
 
     // Parse fractional part

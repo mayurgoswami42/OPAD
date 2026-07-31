@@ -12,6 +12,11 @@ int Reader::get_offset() const
     return offset;
 }
 
+void Reader::close() const
+{
+    write_offset(offset);
+}
+
 // std::getline is not suitable for our case as the log files may be continuously getting written by server,
 // std::getline returns and stop writing line when it hits std::fstream::eof() or '\n' character
 // when server is writing the logs before server finish writing line std::getline reads till last character and due to eof hit, returns
@@ -56,14 +61,14 @@ std::streampos Reader::read_offset() const
 std::streampos Reader::write_offset(std::streampos offset) const
 {
     std::ofstream o_state(STATE_FILE, std::ios::trunc);
-
+    
     if (!o_state)
     {
         std::cout << "ERROR::READER:: cant open reader offset file! (line: " << __LINE__ << ")" << std::endl;
         return offset;
     }
     o_state << static_cast<long long>(offset);
-
+    
     return offset;
 }
 
@@ -71,11 +76,6 @@ Reader::Reader()
 {
     offset = read_offset();
     status = true;
-}
-
-Reader::~Reader()
-{
-    write_offset(offset); // save offset
 }
 
 std::vector<std::string> Reader::read_logs(std::string file_name)
@@ -86,6 +86,12 @@ std::vector<std::string> Reader::read_logs(std::string file_name)
         DEBUG_LOG("READER::ERROR:: Cant open log file!");
         // check the status of reader when you call read_logs
         status = false;
+        return {};
+    }
+
+    if (ifile.peek() == std::ifstream::traits_type::eof())
+    {
+        std::cout << "READER::INFO:: Log file is empty! (line " << __LINE__  << ")"<< std::endl;
         return {};
     }
 

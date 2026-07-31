@@ -11,7 +11,7 @@
 class Parser
 {
 public:
-    // google/re2 pattens are supported only
+    // google/re2 patterns are supported only
     // for syntax visit https://github.com/google/re2/wiki/syntax
     Parser(const std::string_view &labels_types, const std::string &regex_pattern); // single pattern logs
     std::unordered_map<std::string, std::string> parse(const std::string &log_line);

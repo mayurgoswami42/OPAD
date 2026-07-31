@@ -3,6 +3,7 @@
 #include <string>
 #include <chrono>
 #include <utility>
+#include <optional>
 
 namespace utils
 {
@@ -17,7 +18,7 @@ namespace utils
     std::string stringify(std::string str);
 
 
-    utils::time parse_date_time(const std::string &date, const std::string &time);
+    std::optional<utils::time> parse_date_time(const std::string &date, const std::string &time);
 
     utils::time now();
 }

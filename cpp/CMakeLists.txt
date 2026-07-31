@@ -18,6 +18,7 @@ add_library(parser_lib parser/parser.cpp)
 add_library(detector_lib detector/detector.cpp)
 add_library(reporter_lib reporter/reporter.cpp)
 add_library(socket_server_lib socket_server/socket_server.cpp)
+add_library(application_lib application/application.cpp)
 
 target_include_directories(utils_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(io_manager_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -25,12 +26,15 @@ target_include_directories(parser_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(detector_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(reporter_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(socket_server_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(application_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(parser_lib PRIVATE re2)
+target_link_libraries(parser_lib PUBLIC re2)
 
-target_link_libraries(reporter_lib PRIVATE detector_lib parser_lib utils_lib re2)
+target_link_libraries(reporter_lib PRIVATE detector_lib parser_lib utils_lib)
+
+target_link_libraries(application_lib PUBLIC io_manager_lib parser_lib detector_lib reporter_lib socket_server_lib)
 
 add_executable(anomaly_detector main.cpp)
-target_link_libraries(anomaly_detector PRIVATE io_manager_lib parser_lib detector_lib reporter_lib socket_server_lib re2)
+target_link_libraries(anomaly_detector PRIVATE application_lib)
 
 add_custom_target(run COMMAND $<TARGET_FILE:anomaly_detector> ${PROJECT_ROOT}/logs/server.log DEPENDS anomaly_detector WORKING_DIRECTORY ${PROJECT_ROOT} COMMENT "Running anomaly detector on server.log\n")

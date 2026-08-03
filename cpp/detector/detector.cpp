@@ -26,13 +26,13 @@ size_t Detector::sus_log_counts() const
 const double Detector::req_speed(const utils::time &i_time, const utils::time &f_time) const
 {
     std::chrono::milliseconds _time = std::chrono::duration_cast<std::chrono::milliseconds>(f_time - i_time); // nanoseconds -> milliseconds
-    if (_time.count() == 0) return max_speed;
+    if (_time.count() == 0) return max_speed; // requests are very fast so the time is 0 so to count just return the max speed
     double speed = (1/static_cast<double>(_time.count())) * 1000.0;
     if (speed < 0) speed = -speed;
     return speed;
 }
 
-const std::string Detector::get_speed_snap()
+const std::string Detector::get_speed_snap() // use for speed monitor on dashboard
 {
     std::ostringstream ss;
     ss << utils::stringify("scan_speed");
@@ -47,6 +47,7 @@ const std::string Detector::get_speed_snap()
     ss << ":";
     ss << utils::stringify(rate_speed);
 
+    // reset as if server traffic stops the method will send old same speeds continuously
     scan_speed = 0.0;
     error_speed = 0.0;
     rate_speed = 0.0;
@@ -65,7 +66,7 @@ void Detector::window_increment(const Log &log)
     std::optional<utils::time> return_value = utils::parse_date_time(log.at("date"), log.at("time")); // std::string to std::chrono::system_clock::time_point
     if (!return_value.has_value())
     {
-        std::cout << "DETECTOR::ERROR:: incorrect date or time format (line " << __LINE__ << ")" << std::endl;
+        DEBUG_PRINT("DETECTOR::ERROR - Incorrect date or/and time format!");
         return;
     }
 
@@ -73,9 +74,9 @@ void Detector::window_increment(const Log &log)
 
     TimeNCount &ip = ip_frequency[log.at("user_ip")];
 
+    // arguments order matters initial first and final second
     rate_speed = req_speed(ip.prev_time, log_time);
 
-    // arguments order matters initial first and final second
     if (rate_speed >= max_speed) // if requests are faster than the max_speed
         ip.sus_count++; // increment the log count of ip
 
@@ -86,7 +87,7 @@ void Detector::window_increment(const Log &log)
     if (log.at("log_type") == "ERROR")
     {
         error_speed = req_speed(errors.prev_time, log_time);
-        if (error_speed >= max_speed) // if errors are very frequent
+        if (error_speed >= max_speed)
             errors.sus_count++;
         errors.req_count++;    
         errors.prev_time = log_time;
@@ -96,7 +97,7 @@ void Detector::window_increment(const Log &log)
     if (log.at("status") == "404")
     {
         scan_speed = req_speed(not_found.prev_time, log_time);
-        if (scan_speed >= max_speed) // if frequent requests to wrong directory
+        if (scan_speed >= max_speed)
             not_found.sus_count++;
         not_found.req_count++;
         not_found.prev_time = log_time;

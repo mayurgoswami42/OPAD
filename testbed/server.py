@@ -6,7 +6,7 @@ import os
 import sys
 from urllib.parse import parse_qs
 
-HOST = "192.168.43.57"
+HOST = "127.0.0.1"
 PORT = 8000
 
 TEST_MODE = True

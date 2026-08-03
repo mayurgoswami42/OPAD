@@ -26,7 +26,7 @@ def send_requests(random_ips = False, random_dir = False):
         if random_dir:
             line = random.choice(lines)
 
-        response = requests.get(f"http://192.168.43.57:8000/{line}", headers=head)
+        response = requests.get(f"http://127.0.0.1:8000/{line}", headers=head)
         print(response)
 
 threads = []

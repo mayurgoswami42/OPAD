@@ -28,6 +28,7 @@ utils::time utils::now()
     return zt;
 }
 
+// string date time to chrono time point
 std::optional<utils::time> utils::parse_date_time(const std::string &date, const std::string &time)
 {
     if (date.size() <= 0 || time.size() <= 0)

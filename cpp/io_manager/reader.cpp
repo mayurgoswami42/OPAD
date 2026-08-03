@@ -5,7 +5,7 @@
 
 void Reader::reset_offset()
 {
-    std::cout << "reseting the offset!" << std::endl;
+    DEBUG_PRINT("READER::INFO - Reseting offset!");
     offset = 0;
 }
 
@@ -16,7 +16,6 @@ int Reader::get_offset() const
 
 void Reader::close() const
 {
-    std::cout << "close called" << std::endl;
     write_offset(offset);
 }
 
@@ -53,7 +52,7 @@ std::streampos Reader::read_offset() const
     std::ifstream i_state(STATE_FILE);
     long long raw_offset = 0;
     if (i_state) i_state >> raw_offset;
-    else DEBUG_LOG("ERROR::READER:: cant open reader file! (line: " << __LINE__ << ")");
+    else DEBUG_PRINT("READER::ERROR - Can't open reader file!");
 
     std::streampos offset = static_cast<std::streampos>(raw_offset);
 
@@ -67,7 +66,7 @@ std::streampos Reader::write_offset(std::streampos offset) const
     
     if (!o_state)
     {
-        std::cout << "ERROR::READER:: cant open reader offset file! (line: " << __LINE__ << ")" << std::endl;
+        DEBUG_PRINT("READER::ERROR - Reader offset file misplaced!");
         return offset;
     }
     o_state << static_cast<long long>(offset);
@@ -86,7 +85,7 @@ std::vector<std::string> Reader::read_logs(std::string file_name)
     std::ifstream ifile(file_name);
     if (!ifile)
     {
-        DEBUG_LOG("READER::ERROR:: Cant open log file!");
+        DEBUG_PRINT("READER::ERROR - Can't open log file!");
         // check the status of reader when you call read_logs
         status = false;
         return {};
@@ -94,7 +93,7 @@ std::vector<std::string> Reader::read_logs(std::string file_name)
 
     if (ifile.peek() == std::ifstream::traits_type::eof())
     {
-        std::cout << "READER::INFO:: Log file is empty! (line " << __LINE__  << ")"<< std::endl;
+        DEBUG_PRINT("READER::INFO - Log file is empty!");
         utils::thread_sleep(1000);
         return {};
     }

@@ -2,7 +2,8 @@
 
 Parser::Parser(const std::string_view &labels_types, const std::string &regex_pattern): regex_obj(regex_pattern)
 {
-    std::string capture{};
+    std::string capture{}; // key of field
+    // key extractor loop
     for (const char &ch : labels_types)
     {
         if (ch == '(')
@@ -21,13 +22,15 @@ Parser::Parser(const std::string_view &labels_types, const std::string &regex_pa
 std::unordered_map<std::string, std::string> Parser::parse(const std::string &log_line)
 {
     int sz = parsed_logs.size();
+
+    // for variable number of arguments convert them to suitable type as FullMatchN() argument
     std::vector<RE2::Arg> args(sz);
     std::vector<const RE2::Arg*> argv(sz);
 
     for (int i = 0; i < sz; ++i)
     {
         std::string &ref_second = parsed_logs[i].second;
-        ref_second = "";
+        ref_second = ""; // erase in case the field contains old data
         args[i] = RE2::Arg(&ref_second);
         argv[i] = &args[i];
     }

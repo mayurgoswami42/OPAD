@@ -3,7 +3,7 @@
 SocketServer::SocketServer(int port) : _port(port)
 {
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd == -1) DEBUG_LOG("Failed to create socket!");
+    if (server_fd == -1) DEBUG_PRINT("SOCKET_SERVER::ERROR - Failed to create socket!");
 
     int opt = 1;
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
@@ -22,6 +22,7 @@ void SocketServer::remove_client(int client_index)
         clients_fds.pop_back();
         return;
     }
+    // to pop in O(1) time swap the target with the last client_fd then pop back
     int temp = clients_fds.back();
     clients_fds.pop_back();
     clients_fds[client_index] = temp;
@@ -45,10 +46,13 @@ void SocketServer::serve()
             auto rec_msg = receive(clients_fds[i]);
             if (!rec_msg.has_value())
             {
-                DEBUG_LOG("Client " << clients_fds[i] << " is disconnected");
+                DEBUG_PRINT("SOCKET_SERVER::INFO - Client " << clients_fds[i] << " is disconnected");
                 remove_client(i);
                 if (clients_fds.size() > 0)
+                {
                     send_msg(clients_fds[i], msg); // send the message to the client just moved
+                    auto _ = receive(clients_fds[i]);
+                }
                 if (clients_fds.size() <= 0)
                 {
                     stop();
@@ -87,18 +91,18 @@ std::optional<std::string> SocketServer::receive(int client_fd)
 void SocketServer::start(int clients = 0)
 {
     listen(server_fd, clients);
-    DEBUG_LOG("Waiting for the connection on the port: " << _port);
+    DEBUG_PRINT("SOCKET_SERVER::INFO - Waiting for the connection on the port: " << _port);
     int client_fd = accept(server_fd, nullptr, nullptr);
     clients_fds.emplace_back(client_fd);
-    DEBUG_LOG("Client " << client_fd << " is connected! Total clients: " << clients_fds.size());
+    DEBUG_PRINT("SOCKET_SERVER::INFO - Client " << client_fd << " is connected! Total clients: " << clients_fds.size());
 }
 
 void SocketServer::stop()
 {
     server_running = false;
 
+    // accept in serve loop waiting for client to connect send a request and close to stop the server
     int wake_fd = socket(AF_INET, SOCK_STREAM, 0);
-
     if (wake_fd >= 0)
     {
         connect(wake_fd, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));

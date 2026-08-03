@@ -31,13 +31,12 @@ void Application::detection_loop(const std::string& log_path)
 
         if (!reader.status)
         {
-            DEBUG_LOG("MAIN::ERROR:: Reader returned with bad status! (line " << __LINE__ << ")");
-            reader.close();
-            state_running = false;
+            DEBUG_PRINT("APPLICATION::ERROR -  Reader returned with bad status!");
+            stop();
             return;
         }
         
-        if (log_lines.size() == 0)
+        if (log_lines.size() == 0) // if traffic on server is not much then wait for some logs to collected
         {
             utils::thread_sleep(100);
             continue;
@@ -45,18 +44,16 @@ void Application::detection_loop(const std::string& log_path)
         
         for (std::string &s : log_lines)
         {
-            // std::cout << log_lines.size() << std::endl;
-            // std::cout << "line: " << log_lines[0] << std::endl;
             std::unordered_map<std::string, std::string> parsed_log = parser.parse(s);
             (detector.*detector.insert)(parsed_log); // insert is a pointer function switches between do_insert and process, to efficiently process logs
-            int sz = detector.sus_log_counts(); // size of suspicious_logs
+            int sz = detector.sus_log_counts();
             if (sz > 0)
             {
                 for (const std::pair<Detector::Log, Anomaly> sus_log : detector.get_sus_logs())
                 {
                     std::string output = reporter.get_output(sus_log.first, sus_log.second);
                     sock_server.add_task(output);
-                    DEBUG_LOG("suspicious line: " << s);
+                    DEBUG_PRINT("APPLICATION::INFO - suspicious line: " << s);
                 }
                 detector.reset();
             }
@@ -72,7 +69,7 @@ void Application::serve_forever()
         sock_server.serve();
 }
 
-void Application::additional_data()
+void Application::additional_data() // share additional information about the engine
 {
     double prev_tool_speed = 0;
     while (state_running)

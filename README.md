@@ -1,7 +1,7 @@
 # OPAD
-> **Optimized Portable Anomaly Detector**
+> **OPtimized Anomaly Detector**
 
-A high-performance, portable, real-time log anomaly detection platform featuring a C++ detection engine and a Python dashboard. OPAD tails server logs, detects suspicious activity using sliding-window analysis, and streams reports to a live web dashboard over a length-prefixed TCP socket.
+A high-performance, real-time log anomaly detection platform featuring a C++ detection engine and a Python dashboard. OPAD tails server logs, detects suspicious activity using sliding-window analysis, and streams reports to a live web dashboard over a length-prefixed TCP socket.
 
 ## Demo
 
@@ -13,7 +13,6 @@ A high-performance, portable, real-time log anomaly detection platform featuring
 
 - Real-time log monitoring
 - High-performance C++23 detection engine
-- Portable architecture
 - Sliding-window anomaly detection
 - Live, streaming HTML dashboard (Server-Sent Events, no manual refresh)
 - Schema-driven RE2 log parser
@@ -237,4 +236,4 @@ Notable implementation details include:
 
 ---
 
-**OPAD (Optimized Portable Anomaly Detector)** is a portable, real-time log anomaly detection platform built to demonstrate efficient streaming analysis, modular architecture, and secure end-to-end report generation.
+**OPAD (OPtimized Anomaly Detector)** is a real-time log anomaly detection platform built to demonstrate efficient streaming analysis, modular architecture, and secure end-to-end report generation.

@@ -50,7 +50,6 @@ let slide_data = (json_obj) => {
     up_seconds = json_obj["uptime"];
 
     elem_offset.innerHTML = json_obj["offset"];
-    console.log(json_obj["tool_speed"]);
     elem_speed.innerHTML = json_obj["tool_speed"] + " logs/s";
 };
 

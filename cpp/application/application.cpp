@@ -38,7 +38,7 @@ void Application::detection_loop(const std::string& log_path)
         
         if (log_lines.size() == 0) // if traffic on server is not much then wait for some logs to collected
         {
-            utils::thread_sleep(100);
+            utils::thread_sleep(500);
             continue;
         }
         

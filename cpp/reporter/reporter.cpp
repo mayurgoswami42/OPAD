@@ -1,7 +1,7 @@
 #include <sstream>
 
 #include "reporter.hpp"
-#include "utils/utils.hpp"
+#include "../utils/utils.hpp"
 
 // converts a log and anomaly into json string
 std::string Reporter::get_output(const Detector::Log &log, Anomaly anomaly)

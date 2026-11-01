@@ -10,8 +10,8 @@
 #include <sstream>
 
 #include "anomaly_struct.hpp"
-#include "utils/utils.hpp"
-#include "utils/debug.hpp"
+#include "../utils/utils.hpp"
+#include "../utils/debug.hpp"
 
 struct TimeNCount
 {

@@ -1,4 +1,3 @@
-
 #include "reader.hpp"
 #include "utils/debug.hpp"
 #include "utils/utils.hpp"
@@ -49,6 +48,7 @@ bool Reader::custom_getline(std::ifstream &ifile, std::string &line)
 // incase our socket stops, we need to continue from last we ended, hence we maintain offset of log file in storage/.reader_offset
 std::streampos Reader::read_offset() const
 {
+    if (!use_offset) return 0;
     std::ifstream i_state(STATE_FILE);
     long long raw_offset = 0;
     if (i_state) i_state >> raw_offset;
@@ -62,6 +62,7 @@ std::streampos Reader::read_offset() const
 // saves the current offset into the storage/.reader_offset
 std::streampos Reader::write_offset(std::streampos offset) const
 {
+    if (!use_offset) return 0;
     std::ofstream o_state(STATE_FILE, std::ios::trunc);
     
     if (!o_state)
@@ -74,7 +75,7 @@ std::streampos Reader::write_offset(std::streampos offset) const
     return offset;
 }
 
-Reader::Reader()
+Reader::Reader(bool use_offset) : use_offset(use_offset)
 {
     offset = read_offset();
     status = true;
@@ -97,6 +98,8 @@ std::vector<std::string> Reader::read_logs(std::string file_name)
         utils::thread_sleep(1000);
         return {};
     }
+
+    if (!use_offset) reset_offset();
 
     ifile.seekg(offset);
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "detector/detector.hpp"
+#include "../detector/detector.hpp"
 
 class Reporter
 {

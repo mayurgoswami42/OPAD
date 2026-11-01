@@ -9,7 +9,7 @@
 class Reader
 {
 public:
-    Reader();
+    Reader(bool use_offset = true);
     std::vector<std::string> read_logs(std::string);
     void reset_offset();
     bool status = false;
@@ -17,6 +17,7 @@ public:
     void close() const;
     
 private:
+    bool use_offset = true;
     static constexpr const char* STATE_FILE = "cpp/storage/.reader_offset"; // store offset of log file
     std::streampos offset{};
     std::streampos read_offset() const;
